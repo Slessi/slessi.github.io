@@ -1,0 +1,118 @@
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <script>
+            // Get the canvas
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext("2d");
+
+            // Set canvas size based on screen size
+            function setSize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            // Draw the graphics
+            function draw() {
+                // Init variables
+                var sizeMultiplier = 10, // make squares bigger
+                        x = canvas.width / 2, // start from center
+                        y = canvas.height / 2,
+                        dir = 1, // Starting direction for drawing lines
+                        nextX = x, nextY = y, nextDir = dir; // "next" vars are for next line's origin & dir
+                context.lineWidth = sizeMultiplier / 4;
+
+                // Draw the first square manually
+                var size = 1 * sizeMultiplier;
+                context.strokeRect(x, y, size, size);
+
+                // Fibonacci loop     
+                var fib = [0, 1]; // Init values
+                for (var fibCount = 2; fibCount < 40; fibCount++) {
+                    // Get next number (F[n] = F[n-1] + F[n-2]
+                    size = fib[fibCount] = fib[fibCount - 1] + fib[fibCount - 2];
+                    size *= sizeMultiplier;
+
+                    // Go to start position
+                    context.beginPath();
+                    context.moveTo(x, y);
+
+                    // Draw square loop
+                    for (var lineCount = 1; lineCount <= 3; lineCount++) {
+                        // If about to draw the last line, save the direction & co-ord for next round
+                        if (lineCount == 3) {
+                            nextX = x, nextY = y, nextDir = dir - 1;
+                        }
+
+                        // Loop through directions to draw lines to extend a new square
+                        switch (dir++) {
+                            case 1: // left
+                                x -= size;
+                                break;
+                            case 2: // down
+                                y += size;
+                                break;
+                            case 3: // right
+                                x += size;
+                                break;
+                            default: // up
+                                y -= size;
+                                dir = 1;
+                                break;
+                        }
+                        context.lineTo(x, y); // Plot line
+                        context.stroke(); // Draw line
+                    }
+                    // Draw the arc section
+                    drawArc(x, y, size, dir);
+
+                    // Set x/y/dir to appropriate starting position for next square
+                    x = nextX, y = nextY, dir = nextDir;
+                }
+            }
+
+            // Draw the arc section of a spiral, for a given square
+            function drawArc(x, y, size, dir) {
+                var sAngle, eAngle;
+                // Determine arc to draw
+                switch (dir) {
+                    case 1: // left
+                        sAngle = Math.PI;
+                        eAngle = Math.PI / 2;
+                        break;
+                    case 2: // down
+                        sAngle = Math.PI / 2;
+                        eAngle = 0;
+                        break;
+                    case 3: // right
+                        sAngle = 0;
+                        eAngle = Math.PI * 1.5;
+                        break;
+                    default: // up
+                        sAngle = Math.PI * 1.5;
+                        eAngle = Math.PI;
+                        break;
+                }
+                context.beginPath();
+                context.arc(x, y, size, sAngle, eAngle, true);
+                context.strokeStyle = '#ff0000'; // Arcs in red
+                context.stroke();
+                context.strokeStyle = '#000'; // Back to black
+            }
+
+            // Init
+            setSize();
+            draw();
+        </script>
+    </body>
+</html>
